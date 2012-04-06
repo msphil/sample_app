@@ -7,6 +7,7 @@ describe UsersController do
 
     before(:each) do
       @user = Factory(:user)
+      @activity = Factory(:activity)
     end
 
     it "should be successful" do

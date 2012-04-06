@@ -11,7 +11,8 @@ module SessionsHelper
     else
       cookies.signed[:remember_token] = [user.id, user.salt]
     end
-    user.update_attribute(:last_login, Time.now)
+    update_login user
+    update_activity user
     self.current_user = user
   end
 
@@ -30,6 +31,28 @@ module SessionsHelper
   def sign_out
     cookies.delete(:remember_token)
     self.current_user = nil
+  end
+
+  def get_activity(user)
+    activity = Activity.find_by_user(user.id)
+    if !activity
+      activity = Activity.new
+      activity.user = user.id
+      activity.save
+    end
+    return activity
+  end
+
+  def update_login(user)
+    activity = get_activity user
+    activity.last_login = Time.now
+    activity.save
+  end
+
+  def update_activity(user)
+    activity = get_activity user
+    activity.last_activity = Time.now
+    activity.save
   end
 
   private 

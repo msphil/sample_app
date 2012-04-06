@@ -9,7 +9,9 @@
     <td class="sidebar round">
       <strong>Name</strong> <%= @user.name %><br />
       <strong>URL</strong>  <%= link_to user_path(@user), @user %><br />
-      <strong>Last login:</strong> <%= time_ago_in_words(@user.last_login) %></div>
+      <% activity = get_activity current_user %>
+      <strong>Last login:</strong> <%= time_ago_in_words(activity.last_login) %><br />
+      <strong>Last activity:</strong> <%= time_ago_in_words(activity.last_activity) %>
     </td>
   </tr>
 </table>

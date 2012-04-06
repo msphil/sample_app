@@ -142,16 +142,4 @@ describe User do
 
   end
 
-  describe "recent account activity" do
-
-    before(:each) do
-      @user = User.create!(@attr)
-    end
-
-    it "should have a last login" do
-      @user.should respond_to(:last_login)
-    end
-
-  end
-
 end

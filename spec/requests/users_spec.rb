@@ -2,6 +2,10 @@ require 'spec_helper'
 
 describe "Users" do
 
+  before (:each) do
+    @activity = Factory(:activity)
+  end
+
   describe "signup" do
 
     describe "failure" do

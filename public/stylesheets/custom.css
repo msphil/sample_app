@@ -183,3 +183,12 @@ div.field, div.actions {
   font-size: 12px;
   list-style: square;
 }
+
+/* add debug for flash message */
+.debug {
+  background:#d5edf8;
+  color:#205791;
+  border-color:#92cae4;
+  white-space:pre;
+  font-family:monospace;
+}
