@@ -289,6 +289,7 @@ describe UsersController do
       end
     end
 
+
     describe "as a non-admin user" do
       it "should protect the page" do
         test_sign_in(@user)
