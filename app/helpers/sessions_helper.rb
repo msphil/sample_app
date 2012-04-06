@@ -11,6 +11,7 @@ module SessionsHelper
     else
       cookies.signed[:remember_token] = [user.id, user.salt]
     end
+    user.update_attribute(:last_login, Time.now)
     self.current_user = user
   end
 
