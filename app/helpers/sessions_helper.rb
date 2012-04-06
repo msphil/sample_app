@@ -1,7 +1,16 @@
 module SessionsHelper
 
   def sign_in(user)
-    cookies.permanent.signed[:remember_token] = [user.id, user.salt]
+    # if "remember me" is checked, cookie should be permanent (i.e. across sessions), 
+    # otherwise it should be temporary
+    #
+    # Note: when testing with Firefox, "remember tabs" is a session save ("restore last session") 
+    # and keeps session cookies between browser close/open cycles.
+    if @remember_me
+      cookies.permanent.signed[:remember_token] = [user.id, user.salt]
+    else
+      cookies.signed[:remember_token] = [user.id, user.salt]
+    end
     self.current_user = user
   end
 
