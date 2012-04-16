@@ -18,7 +18,8 @@ describe User do
       :name => "Example user", 
       :email => "user@example.com",
       :password => "foobar",
-      :password_confirmation => "foobar"
+      :password_confirmation => "foobar",
+      :public_profile => true
     }
   end
 
@@ -93,6 +94,26 @@ describe User do
       hash = @attr.merge(:password => long, :password_confirmation => long)
       User.new(hash).should_not be_valid
     end
+  end
+
+  describe "profile privacy" do
+
+    before(:each) do
+      @user = User.create!(@attr)
+    end
+
+    it "should have a public_profile field" do
+      @user.should respond_to(:public_profile)
+    end
+
+    it "should allow a profile to be marked as public" do
+      User.new(@attr.merge(:public_profile => true)).should be_valid
+    end
+
+    it "should allow a profile to be marked as private" do
+      User.new(@attr.merge(:public_profile => false)).should be_valid
+    end
+
   end
 
   describe "password encryption" do

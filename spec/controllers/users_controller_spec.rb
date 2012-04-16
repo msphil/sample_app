@@ -6,18 +6,57 @@ describe UsersController do
   describe "GET 'index'" do
 
     describe "for non-signed-in users" do
-      it "should deny access" do
-        get :index
-        response.should redirect_to(signin_path)
-        flash[:notice].should =~ /sign in/i
+
+      before(:each) do
+        @user = Factory(:user)
+        second = Factory(:user, :name => "Bob", :email => "another@example.com", :public_profile => false)
+        third  = Factory(:user, :name => "Ben", :email => "another@example.net")
+
+        @users = [@user, second, third]
+        30.times do
+          @users << Factory(:user, :name => Factory.next(:name), :email => Factory.next(:email))
+        end
       end
+
+      # this test is now invalid due to specification change
+      #it "should deny access" do
+      #  get :index
+      #  response.should redirect_to(signin_path)
+      #  flash[:notice].should =~ /sign in/i
+      #end
+
+      it "should allow access" do
+        get :index
+        response.should be_success
+      end
+
+      it "should have the right title" do
+        get :index
+        response.should have_selector("title", :content => "All users")
+      end
+
+      it "should have an element for each user with a public profile" do
+        get :index
+        response.should have_selector("li", :content => @users[0].name)
+        response.should_not have_selector("li", :content => @users[1].name)
+        response.should have_selector("li", :content => @users[2].name)
+      end
+
+      it "should paginate users" do
+        get :index
+        response.should have_selector("div.pagination")
+        response.should have_selector("span.disabled", :content => "Previous")
+        response.should have_selector("a", :href => "/users?page=2", :content => "2")
+        response.should have_selector("a", :href => "/users?page=2", :content => "Next")
+      end
+
     end
 
     describe "for signed-in users" do
 
       before(:each) do
         @user = test_sign_in(Factory(:user))
-        second = Factory(:user, :name => "Bob", :email => "another@example.com")
+        second = Factory(:user, :name => "Bob", :email => "another@example.com", :public_profile => false)
         third  = Factory(:user, :name => "Ben", :email => "another@example.net")
 
         @users = [@user, second, third]
