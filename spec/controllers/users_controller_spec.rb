@@ -96,33 +96,114 @@ describe UsersController do
 
   describe "GET 'show'" do
 
-    before(:each) do
-      @user = Factory(:user)
+    describe "when signed out" do
+
+      before(:each) do
+        @user = Factory(:user)
+        @second = Factory(:user, :name => "Bob", :email => "another@example.com", :public_profile => false)
+        third  = Factory(:user, :name => "Ben", :email => "another@example.net")
+
+        @users = [@user, @second, third]
+        30.times do
+          @users << Factory(:user, :name => Factory.next(:name), :email => Factory.next(:email))
+        end
+      end
+
+      it "should fail" do
+        get :show, :id => @second
+        response.should_not be_success
+      end
+
+      it "should be successful" do
+        get :show, :id => @user
+        response.should be_success
+      end
+
+      it "should find the right user" do
+        get :show, :id => @user
+        assigns(:user).should == @user
+      end
+
+      it "should have the right title" do
+        get :show, :id => @user
+        response.should have_selector("title", :content => @user.name)
+      end
+
+      it "should include the user's name" do
+        get :show, :id => @user
+        response.should have_selector("h1", :content => @user.name)
+      end
+
+      it "should have a profile image" do
+        get :show, :id => @user
+        response.should have_selector("h1>img", :class => "gravatar")
+      end
+
     end
 
-    it "should be successful" do
-      get :show, :id => @user
-      response.should be_success
-    end
+    describe "when signed in" do
 
-    it "should find the right user" do
-      get :show, :id => @user
-      assigns(:user).should == @user
-    end
+      before(:each) do
+        @user = test_sign_in(Factory(:user))
+        @second = Factory(:user, :name => "Bob", :email => "another@example.com", :public_profile => false)
+        third  = Factory(:user, :name => "Ben", :email => "another@example.net")
 
-    it "should have the right title" do
-      get :show, :id => @user
-      response.should have_selector("title", :content => @user.name)
-    end
+        @users = [@user, @second, third]
+        30.times do
+          @users << Factory(:user, :name => Factory.next(:name), :email => Factory.next(:email))
+        end
+      end
+      it "should be successful (public profile)" do
+        get :show, :id => @user
+        response.should be_success
+      end
 
-    it "should include the user's name" do
-      get :show, :id => @user
-      response.should have_selector("h1", :content => @user.name)
-    end
+      it "should be successful (private profile)" do
+        get :show, :id => @second
+        response.should be_success
+      end
 
-    it "should have a profile image" do
-      get :show, :id => @user
-      response.should have_selector("h1>img", :class => "gravatar")
+      it "should find the right user (public profile)" do
+        get :show, :id => @user
+        assigns(:user).should == @user
+      end
+
+      it "should find the right user (private profile)" do
+        get :show, :id => @second
+        assigns(:user).should == @second
+      end
+
+      it "should have the right title (public profile)" do
+        get :show, :id => @user
+        response.should have_selector("title", :content => @user.name)
+      end
+
+      it "should have the right title (private profile)" do
+        get :show, :id => @second
+        response.should have_selector("title", :content => @second.name)
+      end
+
+      it "should include the user's name (public profile)" do
+        get :show, :id => @user
+        response.should have_selector("h1", :content => @user.name)
+      end
+
+      it "should include the user's name (private profile)" do
+        get :show, :id => @second
+        response.should have_selector("h1", :content => @second.name)
+      end
+
+      it "should have a profile image (public profile)" do
+        get :show, :id => @user
+        response.should have_selector("h1>img", :class => "gravatar")
+      end
+
+      it "should have a profile image (private profile)" do
+        get :show, :id => @second
+        response.should have_selector("h1>img", :class => "gravatar")
+      end
+
+
     end
 
   end
@@ -220,6 +301,11 @@ describe UsersController do
       response.should have_selector("a", :href => gravatar_url, :content => "change")
     end
 
+    it "should have a checkbox to set the privacy settings" do
+      get :edit, :id => @user
+      response.should have_selector("input", :type => "checkbox", :name => "user[public_profile]")
+    end
+
   end
 
   describe "PUT 'update'" do
@@ -264,54 +350,54 @@ describe UsersController do
         put :update, :id => @user, :user => @attr
         response.should redirect_to(user_path(@user))
       end
-      
+
       it "should have a flash message" do
         put :update, :id => @user, :user => @attr
         flash[:success].should =~ /updated/
       end
-      
+
     end
 
   end
 
   describe "authentication of edit/update pages" do
 
+    before(:each) do
+      @user = Factory(:user)
+    end
+
+    describe "for non-signed-in users" do
+
+      it "should deny access to 'edit'" do
+        get :edit, :id => @user
+        response.should redirect_to(signin_path)
+      end
+
+      it "should deny access to 'update'" do
+        put :update, :id => @user, :user => {}
+        response.should redirect_to(signin_path)
+      end
+
+    end
+
+    describe "for signed-in users" do
+
       before(:each) do
-        @user = Factory(:user)
+        wrong_user = Factory(:user, :email => "user@example.net")
+        test_sign_in(wrong_user)
       end
 
-      describe "for non-signed-in users" do
-
-        it "should deny access to 'edit'" do
-          get :edit, :id => @user
-          response.should redirect_to(signin_path)
-        end
-
-        it "should deny access to 'update'" do
-          put :update, :id => @user, :user => {}
-          response.should redirect_to(signin_path)
-        end
-
+      it "should require matching users for 'edit'" do
+        get :edit, :id => @user
+        response.should redirect_to(root_path)
       end
 
-      describe "for signed-in users" do
-
-        before(:each) do
-          wrong_user = Factory(:user, :email => "user@example.net")
-          test_sign_in(wrong_user)
-        end
-
-        it "should require matching users for 'edit'" do
-          get :edit, :id => @user
-          response.should redirect_to(root_path)
-        end
-
-        it "should require matchign users for 'update'" do
-          put :update, :id => @user, :user => {}
-          response.should redirect_to(root_path)
-        end
-
+      it "should require matchign users for 'update'" do
+        put :update, :id => @user, :user => {}
+        response.should redirect_to(root_path)
       end
+
+    end
 
   end
 
