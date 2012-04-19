@@ -109,9 +109,9 @@ describe UsersController do
         end
       end
 
-      it "should fail" do
+      it "should redirect to root" do
         get :show, :id => @second
-        response.should_not be_success
+        response.should redirect_to(root_path)
       end
 
       it "should be successful" do
@@ -218,6 +218,12 @@ describe UsersController do
       get :new
       response.should have_selector("title", :content => "Sign up")
     end
+
+    it "should have a checkbox to set the privacy settings" do
+      get :new
+      response.should have_selector("input", :type => "checkbox", :name => "user[public_profile]")
+    end
+
   end
 
   describe "POST 'create'" do

@@ -102,12 +102,9 @@ describe User do
 
   describe "profile privacy" do
 
-    before(:each) do
-      @user = User.create!(@attr)
-    end
-
     it "should have a public_profile field" do
-      @user.should respond_to(:public_profile)
+      user = User.create!(@attr)
+      user.should respond_to(:public_profile)
     end
 
     it "should allow a profile to be marked as public" do
