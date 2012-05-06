@@ -15,8 +15,11 @@ class UsersController < ApplicationController
   def show
     @user = User.find(params[:id])
     @title = @user.name
-    #@microposts = @user.microposts.search(params[:search]).paginate(:page => params[:page])
-    @microposts = @user.microposts.paginate(:page => params[:page])
+    if params[:search] and params[:search].length > 0
+      @microposts = @user.microposts.search(params[:search], :match_mode => :any).paginate(:page => params[:page])
+    else
+      @microposts = @user.microposts.paginate(:page => params[:page])
+    end
   end
 
   def new

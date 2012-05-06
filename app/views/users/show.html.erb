@@ -7,6 +7,12 @@
       </h1>
       <%= render 'follow_form' if signed_in? %>
       <% unless @user.microposts.empty? %>
+        <% form_tag user_path, :method => :get do %>
+            <p>
+                <%= text_field_tag :search, params[:search] %>
+                <%= submit_tag "Search", :name => nil %>
+            </p>
+        <% end %>
         <table class="microposts" summary="User microposts">
           <%= render @microposts %>
         </table>
