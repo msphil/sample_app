@@ -4,14 +4,19 @@ class UsersController < ApplicationController
   before_filter :admin_user,   :only => :destroy
 
   def index
-    @title = "All users"
-    @users = User.paginate(:page => params[:page])
+    if (params[:search] and params[:search].length > 0)
+      @title = "Users matching '#{params[:search]}'"
+    else
+      @title = "All users"
+    end
+    @users = User.search(params[:search]).paginate(:page => params[:page])
   end
 
   def show
     @user = User.find(params[:id])
-    @microposts = @user.microposts.paginate(:page => params[:page])
     @title = @user.name
+    @microposts = @user.microposts.search(params[:search]).paginate(:page => params[:page])
+    #@microposts = @user.microposts.paginate(:page => params[:page])
   end
 
   def new

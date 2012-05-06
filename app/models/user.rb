@@ -64,6 +64,14 @@ class User < ActiveRecord::Base
     Micropost.from_users_followed_by(self)
   end
 
+  def self.search(search)
+    if search
+      @users = User.find(:all, :conditions => ['name LIKE ?', "%#{search}%"])
+    else
+      @users = User.find(:all)
+    end
+  end
+
   private
 
     def encrypt_password
