@@ -1,11 +1,11 @@
+<% form_tag root_path, :method => :get do %>
+    <p>
+        <%= text_field_tag :search, params[:search] %>
+        <%= submit_tag "Search", :name => nil %>
+    </p>
+<% end %>
 <% unless @feed_items.empty? %>
   <table class="microposts" summary="User microposts">
-        <% form_tag root_path, :method => :get do %>
-            <p>
-                <%= text_field_tag :search, params[:search] %>
-                <%= submit_tag "Search", :name => nil %>
-            </p>
-        <% end %>
     <%= render :partial => 'shared/feed_item', :collection => @feed_items %>
   </table>
   <%= will_paginate @feed_items %>
